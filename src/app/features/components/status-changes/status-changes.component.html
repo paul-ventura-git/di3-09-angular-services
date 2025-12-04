@@ -1,1 +1,223 @@
-<p>status-changes works!</p>
+<div class="registro-container">
+  <h2>Formulario de Registro</h2>
+
+  <!-- Indicador de estado del formulario -->
+  <div class="estado-form" [ngClass]="{
+    'estado-valid': estadoFormulario === 'VALID',
+    'estado-invalid': estadoFormulario === 'INVALID',
+    'estado-pending': estadoFormulario === 'PENDING'
+  }">
+    <p>{{ mensajeEstado }}</p>
+    @if (camposInvalidos.length > 0) {
+      <div class="campos-invalidos">
+        <strong>Campos con errores:</strong>
+        <ul>
+          @for (campo of camposInvalidos; track campo) {
+            <li>{{ campo }}</li>
+          }
+        </ul>
+      </div>
+    }
+  </div>
+
+  <form [formGroup]="registroForm" (ngSubmit)="enviarRegistro()">
+
+    <!-- Username -->
+    <div class="form-group">
+      <label for="username">Nombre de Usuario:</label>
+      <input
+        type="text"
+        id="username"
+        formControlName="username"
+        placeholder="Mínimo 4 caracteres"
+        class="form-control"
+        [ngClass]="{
+          'input-valid': registroForm.get('username')?.valid && registroForm.get('username')?.touched,
+          'input-invalid': registroForm.get('username')?.invalid && registroForm.get('username')?.touched
+        }">
+
+      @if (registroForm.get('username')?.invalid && registroForm.get('username')?.touched) {
+        <div class="error">
+          @if (registroForm.get('username')?.hasError('required')) {
+            <span>El nombre de usuario es requerido</span>
+          }
+          @if (registroForm.get('username')?.hasError('minlength')) {
+            <span>Mínimo 4 caracteres</span>
+          }
+          @if (registroForm.get('username')?.hasError('maxlength')) {
+            <span>Máximo 20 caracteres</span>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Email -->
+    <div class="form-group">
+      <label for="email">Email:</label>
+      <input
+        type="email"
+        id="email"
+        formControlName="email"
+        placeholder="correo@ejemplo.com"
+        class="form-control"
+        [ngClass]="{
+          'input-valid': registroForm.get('email')?.valid && registroForm.get('email')?.touched,
+          'input-invalid': registroForm.get('email')?.invalid && registroForm.get('email')?.touched
+        }">
+
+      @if (registroForm.get('email')?.invalid && registroForm.get('email')?.touched) {
+        <div class="error">
+          @if (registroForm.get('email')?.hasError('required')) {
+            <span>El email es requerido</span>
+          }
+          @if (registroForm.get('email')?.hasError('email')) {
+            <span>Ingresa un email válido</span>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Password -->
+    <div class="form-group">
+      <label for="password">Contraseña:</label>
+      <div class="password-container">
+        <input
+          [type]="mostrarPassword ? 'text' : 'password'"
+          id="password"
+          formControlName="password"
+          placeholder="Mínimo 8 caracteres"
+          class="form-control"
+          [ngClass]="{
+            'input-valid': registroForm.get('password')?.valid && registroForm.get('password')?.touched,
+            'input-invalid': registroForm.get('password')?.invalid && registroForm.get('password')?.touched
+          }">
+        <button type="button" class="toggle-password" (click)="togglePasswordVisibility()">
+          {{ mostrarPassword ? 'Ocultar' : 'Ver' }}
+        </button>
+      </div>
+
+      @if (registroForm.get('password')?.invalid && registroForm.get('password')?.touched) {
+        <div class="error">
+          @if (registroForm.get('password')?.hasError('required')) {
+            <span>La contraseña es requerida</span>
+          }
+          @if (registroForm.get('password')?.hasError('minlength')) {
+            <span>Mínimo 8 caracteres</span>
+          }
+          @if (registroForm.get('password')?.hasError('weakPassword')) {
+            <span>Debe incluir mayúscula, minúscula, número y carácter especial</span>
+          }
+        </div>
+      }
+
+      <small class="hint">Debe tener al menos: 1 mayúscula, 1 minúscula, 1 número y 1 carácter especial</small>
+    </div>
+
+    <!-- Confirmar Password -->
+    <div class="form-group">
+      <label for="confirmPassword">Confirmar Contraseña:</label>
+      <input
+        [type]="mostrarPassword ? 'text' : 'password'"
+        id="confirmPassword"
+        formControlName="confirmPassword"
+        placeholder="Repite tu contraseña"
+        class="form-control"
+        [ngClass]="{
+          'input-valid': registroForm.get('confirmPassword')?.valid && !registroForm.hasError('passwordMismatch') && registroForm.get('confirmPassword')?.touched,
+          'input-invalid': (registroForm.get('confirmPassword')?.invalid || registroForm.hasError('passwordMismatch')) && registroForm.get('confirmPassword')?.touched
+        }">
+
+      @if (registroForm.get('confirmPassword')?.touched) {
+        @if (registroForm.get('confirmPassword')?.hasError('required')) {
+          <div class="error">
+            <span>Debes confirmar tu contraseña</span>
+          </div>
+        }
+        @if (registroForm.hasError('passwordMismatch') && !registroForm.get('confirmPassword')?.hasError('required')) {
+          <div class="error">
+            <span>Las contraseñas no coinciden</span>
+          </div>
+        }
+      }
+    </div>
+
+    <!-- Edad -->
+    <div class="form-group">
+      <label for="edad">Edad:</label>
+      <input
+        type="number"
+        id="edad"
+        formControlName="edad"
+        placeholder="Debes ser mayor de 18"
+        class="form-control"
+        min="18"
+        max="120"
+        [ngClass]="{
+          'input-valid': registroForm.get('edad')?.valid && registroForm.get('edad')?.touched,
+          'input-invalid': registroForm.get('edad')?.invalid && registroForm.get('edad')?.touched
+        }">
+
+      @if (registroForm.get('edad')?.invalid && registroForm.get('edad')?.touched) {
+        <div class="error">
+          @if (registroForm.get('edad')?.hasError('required')) {
+            <span>La edad es requerida</span>
+          }
+          @if (registroForm.get('edad')?.hasError('min')) {
+            <span>Debes ser mayor de 18 años</span>
+          }
+          @if (registroForm.get('edad')?.hasError('max')) {
+            <span>Edad inválida</span>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Términos y Condiciones -->
+    <div class="form-group checkbox-group">
+      <label class="checkbox-label">
+        <input
+          type="checkbox"
+          formControlName="terminos"
+          class="checkbox-input">
+        <span>Acepto los términos y condiciones</span>
+      </label>
+
+      @if (registroForm.get('terminos')?.invalid && registroForm.get('terminos')?.touched) {
+        <div class="error">
+          <span>Debes aceptar los términos y condiciones</span>
+        </div>
+      }
+    </div>
+
+    <!-- Botón de envío -->
+    <button
+      type="submit"
+      class="btn-submit"
+      [disabled]="registroForm.invalid || estadoFormulario === 'PENDING'">
+      @if (estadoFormulario === 'PENDING') {
+        <span>Validando...</span>
+      } @else {
+        <span>Registrarse</span>
+      }
+    </button>
+  </form>
+
+  <!-- Debug: Estado del formulario -->
+  <div class="debug">
+    <h4>Monitor de Estado (statusChanges):</h4>
+    <p><strong>Estado:</strong> <span class="badge" [ngClass]="'badge-' + estadoFormulario.toLowerCase()">{{ estadoFormulario }}</span></p>
+    <p><strong>Válido:</strong> {{ registroForm.valid }}</p>
+    <p><strong>Tocado:</strong> {{ registroForm.touched }}</p>
+    <p><strong>Pristine:</strong> {{ registroForm.pristine }}</p>
+
+    <h5>Estado por campo:</h5>
+    <ul>
+      <li>Username: <strong>{{ registroForm.get('username')?.status }}</strong></li>
+      <li>Email: <strong>{{ registroForm.get('email')?.status }}</strong></li>
+      <li>Password: <strong>{{ registroForm.get('password')?.status }}</strong></li>
+      <li>Confirm Password: <strong>{{ registroForm.get('confirmPassword')?.status }}</strong></li>
+      <li>Edad: <strong>{{ registroForm.get('edad')?.status }}</strong></li>
+      <li>Términos: <strong>{{ registroForm.get('terminos')?.status }}</strong></li>
+    </ul>
+  </div>
+</div>
