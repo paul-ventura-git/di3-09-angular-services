@@ -1,0 +1,111 @@
+<div class="cotizacion-container">
+  <h2>Cotización de Producto</h2>
+
+  <form [formGroup]="cotizacionForm" (ngSubmit)="enviarCotizacion()">
+
+    <!-- Producto -->
+    <div class="form-group">
+      <label for="producto">Producto:</label>
+      <input
+        type="text"
+        id="producto"
+        formControlName="producto"
+        placeholder="Nombre del producto"
+        class="form-control">
+      @if(cotizacionForm.get('producto')?.invalid && cotizacionForm.get('producto')?.touched){
+        <div class="error">
+          El producto es requerido
+        </div>
+      }
+
+    </div>
+
+    <!-- Cantidad -->
+    <div class="form-group">
+      <label for="cantidad">Cantidad:</label>
+      <input
+        type="number"
+        id="cantidad"
+        formControlName="cantidad"
+        class="form-control"
+        min="1">
+      @if(cotizacionForm.get('cantidad')?.invalid && cotizacionForm.get('cantidad')?.touched){
+        <div class="error">
+          La cantidad debe ser mayor a 0
+        </div>
+      }
+    </div>
+
+    <!-- Precio Unitario -->
+    <div class="form-group">
+      <label for="precioUnitario">Precio Unitario ($):</label>
+      <input
+        type="number"
+        id="precioUnitario"
+        formControlName="precioUnitario"
+        class="form-control"
+        step="0.01"
+        min="0">
+      @if(cotizacionForm.get('precioUnitario')?.invalid && cotizacionForm.get('precioUnitario')?.touched){
+        <div class="error">
+          El precio debe ser mayor o igual a 0
+        </div>
+      }
+    </div>
+
+    <!-- Código de Descuento -->
+    <div class="form-group">
+      <label for="codigoDescuento">Código de Descuento (opcional):</label>
+      <input
+        type="text"
+        id="codigoDescuento"
+        formControlName="codigoDescuento"
+        placeholder="Ejemplo: DESC10 o DESC20"
+        class="form-control">
+      <small class="hint">Prueba con DESC10 o DESC20</small>
+    </div>
+
+    <!-- Email -->
+    <div class="form-group">
+      <label for="email">Email:</label>
+      <input
+        type="email"
+        id="email"
+        formControlName="email"
+        placeholder="tu@email.com"
+        class="form-control">
+      @if(cotizacionForm.get('email')?.invalid && cotizacionForm.get('email')?.touched){
+        <div class="error">
+          Ingresa un email válido
+        </div>
+      }
+    </div>
+
+    <!-- Resumen -->
+    <div class="resumen">
+      <h3>Resumen</h3>
+      <p><strong>Subtotal:</strong> ${{ (cotizacionForm.value.cantidad * cotizacionForm.value.precioUnitario) | number:'1.2-2' }}</p>
+      @if(descuentoAplicado > 0){
+      <p class="descuento">
+        <strong>Descuento:</strong> -${{ descuentoAplicado | number:'1.2-2' }}
+      </p>
+      }
+      <p class="total"><strong>Total:</strong> ${{ total | number:'1.2-2' }}</p>
+    </div>
+
+    <!-- Botón de envío -->
+    <button
+      type="submit"
+      class="btn-submit"
+      [disabled]="cotizacionForm.invalid">
+      Enviar Cotización
+    </button>
+  </form>
+
+  <!-- Debug: Mostrar estado del formulario -->
+  <div class="debug">
+    <h4>Estado del formulario:</h4>
+    <pre>{{ cotizacionForm.value | json }}</pre>
+    <p>Válido: {{ cotizacionForm.valid }}</p>
+  </div>
+</div>
