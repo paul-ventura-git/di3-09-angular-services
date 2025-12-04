@@ -88,13 +88,13 @@
                     class="btn-edit"
                     (click)="editProduct(product.id)"
                     [disabled]="isLoading">
-                    ✏️ EDIT
+                    EDIT
                   </button>
                   <button
                     class="btn-delete"
                     (click)="deleteProduct(product.id, product.title)"
                     [disabled]="isLoading">
-                    🗑️ DELETE
+                    DELETE
                   </button>
                 </td>
               </tr>
@@ -109,9 +109,9 @@
   <section class="product-form-section" id="product-form">
     <h2>
       @if (isEditMode) {
-        <span>✏️ Editar Producto</span>
+        <span>Editar Producto</span>
       } @else {
-        <span>➕ Agregar Nuevo Producto</span>
+        <span>Agregar Nuevo Producto</span>
       }
     </h2>
 
@@ -121,9 +121,9 @@
       'status-invalid': formStatus === 'INVALID'
     }">
       @if (formStatus === 'VALID') {
-        <span>✓ Formulario válido - Listo para guardar</span>
+        <span>Formulario válido - Listo para guardar</span>
       } @else {
-        <span>✗ Completa todos los campos correctamente</span>
+        <span>Completa todos los campos correctamente</span>
       }
     </div>
 
@@ -387,9 +387,9 @@
           class="btn-submit"
           [disabled]="productForm.invalid || isLoading">
           @if (isEditMode) {
-            <span>💾 Actualizar Producto</span>
+            <span>Actualizar Producto</span>
           } @else {
-            <span>➕ Agregar Producto</span>
+            <span>Agregar Producto</span>
           }
         </button>
 
@@ -399,7 +399,7 @@
             class="btn-cancel"
             (click)="resetForm()"
             [disabled]="isLoading">
-            ❌ Cancelar Edición
+            Cancelar Edición
           </button>
         }
       </div>
@@ -408,7 +408,7 @@
 
   <!-- Debug Info -->
   <details class="debug-section">
-    <summary>🔍 Información de Debug</summary>
+    <summary>Información de Debug</summary>
     <div class="debug-content">
       <h4>Estado del Formulario (statusChanges):</h4>
       <p><strong>Estado:</strong> <span class="badge" [ngClass]="'badge-' + formStatus.toLowerCase()">{{ formStatus }}</span></p>

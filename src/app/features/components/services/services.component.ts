@@ -62,9 +62,9 @@ export class ServicesComponent implements OnInit, OnDestroy {
         console.log('Estado del formulario:', status);
 
         if (status === 'VALID') {
-          console.log('✓ Formulario válido - Listo para guardar');
+          console.log('Formulario válido - Listo para guardar');
         } else if (status === 'INVALID') {
-          console.log('✗ Formulario inválido - Revisa los campos');
+          console.log('Formulario inválido - Revisa los campos');
         }
       });
 
@@ -95,7 +95,7 @@ export class ServicesComponent implements OnInit, OnDestroy {
       )
       .subscribe(status => {
         if (status === 'VALID') {
-          console.log('✓ Título del producto válido');
+          console.log('Título del producto válido');
         }
       });
 
@@ -108,7 +108,7 @@ export class ServicesComponent implements OnInit, OnDestroy {
       .subscribe(precio => {
         const precioNum = parseFloat(precio);
         if (precioNum > 1000) {
-          console.log('⚠️ Precio alto detectado: $' + precioNum);
+          console.log('Precio alto detectado: $' + precioNum);
         }
       });
 
@@ -121,7 +121,7 @@ export class ServicesComponent implements OnInit, OnDestroy {
       .subscribe(discount => {
         const desc = parseFloat(discount);
         if (desc > 0.5) {
-          console.log('⚠️ Descuento mayor al 50%:', (desc * 100).toFixed(0) + '%');
+          console.log('Descuento mayor al 50%:', (desc * 100).toFixed(0) + '%');
         }
       });
 
@@ -132,7 +132,7 @@ export class ServicesComponent implements OnInit, OnDestroy {
         if (status === 'VALID') {
           const stockValue = parseInt(this.productForm.get('stock')?.value);
           if (stockValue < 10) {
-            console.log('⚠️ Stock bajo detectado:', stockValue);
+            console.log('Stock bajo detectado:', stockValue);
           }
         }
       });
