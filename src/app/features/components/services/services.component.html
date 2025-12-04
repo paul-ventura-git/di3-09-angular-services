@@ -1,0 +1,442 @@
+<div class="service-container">
+  <h1>Gestión de Productos - CRUD</h1>
+
+  <!-- Indicador de carga -->
+  @if (isLoading) {
+    <div class="loading-overlay">
+      <div class="spinner"></div>
+      <p>Cargando...</p>
+    </div>
+  }
+
+  <!-- Estadísticas -->
+  <div class="estadisticas">
+    <div class="stat-card">
+      <h3>Total Productos</h3>
+      <p class="stat-value">{{ totalProductos }}</p>
+    </div>
+    <div class="stat-card">
+      <h3>Valor Total Inventario</h3>
+      <p class="stat-value">${{ valorTotalInventario | number:'1.2-2' }}</p>
+    </div>
+  </div>
+
+  <!-- Lista de productos -->
+  <section class="products-list">
+    <h2>Lista de Productos</h2>
+
+    @if (products.length === 0 && !isLoading) {
+      <div class="empty-state">
+        <p>No hay productos registrados</p>
+        <p class="hint">Usa el formulario de abajo para agregar productos</p>
+      </div>
+    } @else {
+      <div class="table-container">
+        <table class="products-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Título</th>
+              <th>Descripción</th>
+              <th>Categoría</th>
+              <th>Marca</th>
+              <th>Precio</th>
+              <th>Descuento</th>
+              <th>Precio Final</th>
+              <th>Stock</th>
+              <th>Rating</th>
+              <th>Peso (g)</th>
+              <th>Valor Total</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (product of products; track product.id) {
+              <tr [class.editing]="editingProductId === product.id">
+                <td class="id-cell" [title]="product.id">
+                  {{ product.id.substring(0, 8) }}...
+                </td>
+                <td><strong>{{ product.title }}</strong></td>
+                <td class="descripcion">{{ product.description }}</td>
+                <td>
+                  <span class="badge badge-category">{{ product.category }}</span>
+                </td>
+                <td>{{ product.brand }}</td>
+                <td class="precio">${{ product.price }}</td>
+                <td class="descuento">
+                  <span class="badge badge-discount">
+                    {{ (+product.discount * 100) | number:'1.0-0' }}%
+                  </span>
+                </td>
+                <td class="precio-final">
+                  ${{ calcularPrecioFinal(product) | number:'1.2-2' }}
+                </td>
+                <td class="stock">
+                  <span [class.stock-bajo]="+product.stock < 10">
+                    {{ product.stock }} unidades
+                  </span>
+                </td>
+                <td class="rating">
+                  {{ getStars(product.rating) }}
+                </td>
+                <td>{{ product.weight }}g</td>
+                <td class="valor-total">
+                  ${{ calcularValorTotal(product) | number:'1.2-2' }}
+                </td>
+                <td class="actions">
+                  <button
+                    class="btn-edit"
+                    (click)="editProduct(product.id)"
+                    [disabled]="isLoading">
+                    ✏️ EDIT
+                  </button>
+                  <button
+                    class="btn-delete"
+                    (click)="deleteProduct(product.id, product.title)"
+                    [disabled]="isLoading">
+                    🗑️ DELETE
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+
+  <!-- Formulario de producto -->
+  <section class="product-form-section" id="product-form">
+    <h2>
+      @if (isEditMode) {
+        <span>✏️ Editar Producto</span>
+      } @else {
+        <span>➕ Agregar Nuevo Producto</span>
+      }
+    </h2>
+
+    <!-- Indicador de estado del formulario -->
+    <div class="form-status" [ngClass]="{
+      'status-valid': formStatus === 'VALID',
+      'status-invalid': formStatus === 'INVALID'
+    }">
+      @if (formStatus === 'VALID') {
+        <span>✓ Formulario válido - Listo para guardar</span>
+      } @else {
+        <span>✗ Completa todos los campos correctamente</span>
+      }
+    </div>
+
+    <form [formGroup]="productForm" (ngSubmit)="saveProduct()">
+
+      <!-- Título y Marca -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="title">Título del Producto: *</label>
+          <input
+            type="text"
+            id="title"
+            formControlName="title"
+            placeholder="Ej: Laptop Dell Inspiron"
+            class="form-control"
+            [ngClass]="{
+              'input-valid': productForm.get('title')?.valid && productForm.get('title')?.touched,
+              'input-invalid': isFieldInvalid('title')
+            }">
+
+          @if (isFieldInvalid('title')) {
+            <div class="error">
+              @if (productForm.get('title')?.hasError('required')) {
+                <span>El título es requerido</span>
+              }
+              @if (productForm.get('title')?.hasError('minlength')) {
+                <span>Mínimo 3 caracteres</span>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="brand">Marca: *</label>
+          <input
+            type="text"
+            id="brand"
+            formControlName="brand"
+            placeholder="Ej: Samsung, Nike, Coca-Cola"
+            class="form-control"
+            [ngClass]="{
+              'input-valid': productForm.get('brand')?.valid && productForm.get('brand')?.touched,
+              'input-invalid': isFieldInvalid('brand')
+            }">
+
+          @if (isFieldInvalid('brand')) {
+            <div class="error">
+              @if (productForm.get('brand')?.hasError('required')) {
+                <span>La marca es requerida</span>
+              }
+              @if (productForm.get('brand')?.hasError('minlength')) {
+                <span>Mínimo 2 caracteres</span>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Descripción -->
+      <div class="form-group">
+        <label for="description">Descripción: *</label>
+        <textarea
+          id="description"
+          formControlName="description"
+          placeholder="Describe las características del producto"
+          class="form-control"
+          rows="3"
+          [ngClass]="{
+            'input-valid': productForm.get('description')?.valid && productForm.get('description')?.touched,
+            'input-invalid': isFieldInvalid('description')
+          }"></textarea>
+
+        @if (isFieldInvalid('description')) {
+          <div class="error">
+            @if (productForm.get('description')?.hasError('required')) {
+              <span>La descripción es requerida</span>
+            }
+            @if (productForm.get('description')?.hasError('minlength')) {
+              <span>Mínimo 10 caracteres</span>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Categoría y Rating -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="category">Categoría: *</label>
+          <select
+            id="category"
+            formControlName="category"
+            class="form-control"
+            [ngClass]="{
+              'input-valid': productForm.get('category')?.valid && productForm.get('category')?.touched,
+              'input-invalid': isFieldInvalid('category')
+            }">
+            <option value="">Selecciona una categoría</option>
+            @for (cat of categorias; track cat) {
+              <option [value]="cat">{{ cat }}</option>
+            }
+          </select>
+
+          @if (isFieldInvalid('category')) {
+            <div class="error">
+              <span>La categoría es requerida</span>
+            </div>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="rating">Rating (1-5): *</label>
+          <select
+            id="rating"
+            formControlName="rating"
+            class="form-control"
+            [ngClass]="{
+              'input-valid': productForm.get('rating')?.valid && productForm.get('rating')?.touched,
+              'input-invalid': isFieldInvalid('rating')
+            }">
+            <option value="">Selecciona rating</option>
+            @for (rate of ratings; track rate) {
+              <option [value]="rate">{{ getStars(rate) }} ({{ rate }})</option>
+            }
+          </select>
+
+          @if (isFieldInvalid('rating')) {
+            <div class="error">
+              <span>El rating es requerido</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Precio, Descuento y Precio Final -->
+      <div class="form-row form-row-three">
+        <div class="form-group">
+          <label for="price">Precio ($): *</label>
+          <input
+            type="text"
+            id="price"
+            formControlName="price"
+            placeholder="0.00"
+            class="form-control"
+            [ngClass]="{
+              'input-valid': productForm.get('price')?.valid && productForm.get('price')?.touched,
+              'input-invalid': isFieldInvalid('price')
+            }">
+
+          @if (isFieldInvalid('price')) {
+            <div class="error">
+              @if (productForm.get('price')?.hasError('required')) {
+                <span>El precio es requerido</span>
+              }
+              @if (productForm.get('price')?.hasError('pattern')) {
+                <span>Formato: 0.00</span>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="discount">Descuento (0.00-0.99): *</label>
+          <input
+            type="text"
+            id="discount"
+            formControlName="discount"
+            placeholder="0.15 (15%)"
+            class="form-control"
+            [ngClass]="{
+              'input-valid': productForm.get('discount')?.valid && productForm.get('discount')?.touched,
+              'input-invalid': isFieldInvalid('discount')
+            }">
+
+          @if (isFieldInvalid('discount')) {
+            <div class="error">
+              @if (productForm.get('discount')?.hasError('required')) {
+                <span>El descuento es requerido</span>
+              }
+              @if (productForm.get('discount')?.hasError('pattern')) {
+                <span>Formato: 0.00 a 0.99</span>
+              }
+              @if (productForm.get('discount')?.hasError('max')) {
+                <span>Máximo 0.99</span>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="form-group">
+          <label>Precio Final:</label>
+          <div class="precio-calculado">
+            ${{ precioConDescuento | number:'1.2-2' }}
+          </div>
+          <small class="hint">
+            @if (productForm.get('discount')?.value) {
+              <span>
+                Descuento: {{ ((+productForm.get('discount')?.value || 0) * 100).toFixed(0) }}%
+              </span>
+            }
+          </small>
+        </div>
+      </div>
+
+      <!-- Stock y Peso -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="stock">Stock (unidades): *</label>
+          <input
+            type="text"
+            id="stock"
+            formControlName="stock"
+            placeholder="100"
+            class="form-control"
+            [ngClass]="{
+              'input-valid': productForm.get('stock')?.valid && productForm.get('stock')?.touched,
+              'input-invalid': isFieldInvalid('stock')
+            }">
+
+          @if (isFieldInvalid('stock')) {
+            <div class="error">
+              @if (productForm.get('stock')?.hasError('required')) {
+                <span>El stock es requerido</span>
+              }
+              @if (productForm.get('stock')?.hasError('pattern')) {
+                <span>Solo números enteros</span>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="weight">Peso (gramos): *</label>
+          <input
+            type="text"
+            id="weight"
+            formControlName="weight"
+            placeholder="400"
+            class="form-control"
+            [ngClass]="{
+              'input-valid': productForm.get('weight')?.valid && productForm.get('weight')?.touched,
+              'input-invalid': isFieldInvalid('weight')
+            }">
+
+          @if (isFieldInvalid('weight')) {
+            <div class="error">
+              @if (productForm.get('weight')?.hasError('required')) {
+                <span>El peso es requerido</span>
+              }
+              @if (productForm.get('weight')?.hasError('pattern')) {
+                <span>Solo números enteros</span>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Botones de acción -->
+      <div class="form-actions">
+        <button
+          type="submit"
+          class="btn-submit"
+          [disabled]="productForm.invalid || isLoading">
+          @if (isEditMode) {
+            <span>💾 Actualizar Producto</span>
+          } @else {
+            <span>➕ Agregar Producto</span>
+          }
+        </button>
+
+        @if (isEditMode) {
+          <button
+            type="button"
+            class="btn-cancel"
+            (click)="resetForm()"
+            [disabled]="isLoading">
+            ❌ Cancelar Edición
+          </button>
+        }
+      </div>
+    </form>
+  </section>
+
+  <!-- Debug Info -->
+  <details class="debug-section">
+    <summary>🔍 Información de Debug</summary>
+    <div class="debug-content">
+      <h4>Estado del Formulario (statusChanges):</h4>
+      <p><strong>Estado:</strong> <span class="badge" [ngClass]="'badge-' + formStatus.toLowerCase()">{{ formStatus }}</span></p>
+      <p><strong>Modo:</strong> {{ isEditMode ? 'EDICIÓN' : 'CREACIÓN' }}</p>
+      @if (isEditMode) {
+        <p><strong>ID Editando:</strong> {{ editingProductId }}</p>
+      }
+
+      <h4>Valores del Formulario (valueChanges):</h4>
+      <pre>{{ productForm.value | json }}</pre>
+
+      <h4>Precio con Descuento (calculado con valueChanges):</h4>
+      <p><strong>${{ precioConDescuento | number:'1.2-2' }}</strong></p>
+      <h4>Estado por Campo:</h4>
+        <ul>
+          <li>Title: <strong>{{ productForm.get('title')?.status }}</strong></li>
+          <li>Description: <strong>{{ productForm.get('description')?.status }}</strong></li>
+          <li>Category: <strong>{{ productForm.get('category')?.status }}</strong></li>
+          <li>Price: <strong>{{ productForm.get('price')?.status }}</strong></li>
+          <li>Discount: <strong>{{ productForm.get('discount')?.status }}</strong></li>
+          <li>Rating: <strong>{{ productForm.get('rating')?.status }}</strong></li>
+          <li>Stock: <strong>{{ productForm.get('stock')?.status }}</strong></li>
+          <li>Brand: <strong>{{ productForm.get('brand')?.status }}</strong></li>
+          <li>Weight: <strong>{{ productForm.get('weight')?.status }}</strong></li>
+        </ul>
+
+        <h4>API Endpoint:</h4>
+        <p><code>http://localhost:8080/products</code></p>
+      </div>
+  </details>
+</div>

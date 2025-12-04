@@ -8,5 +8,9 @@ export const routes: Routes = [
   {
     path: 'status-changes',
     loadComponent: () => import('./features/components/status-changes/status-changes.component').then(m => m.StatusChangesComponent)
+  },
+  {
+    path: 'services',
+    loadComponent: () => import('./features/components/services/services.component').then(m => m.ServicesComponent)
   }
 ];
