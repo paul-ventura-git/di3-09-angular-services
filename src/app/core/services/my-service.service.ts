@@ -40,16 +40,16 @@ export class MyServiceService {
   // GET BY ID - Obtener un producto por ID
   getById(id: string): Observable<Product> {
     const url = `${this.apiUrl}/${id}`;
-    return this.http.get<{ products: Product }>(url).pipe(
-      map(response => response.products),
-      catchError(this.handleError)
+    return this.http.get<{ product: Product }>(url).pipe(
+      map(response => response.product),
+      catchError(this.handleError),
     );
   }
 
   // CREATE - Crear un nuevo producto
   create(product: Omit<Product, 'id'>): Observable<Product> {
-    return this.http.post<{ products: Product }>(this.apiUrl, product).pipe(
-      map(response => response.products),
+    return this.http.post<{ product: Product }>(this.apiUrl, product).pipe(
+      map(response => response.product),
       catchError(this.handleError)
     );
   }
@@ -57,8 +57,8 @@ export class MyServiceService {
   // UPDATE - Actualizar un producto existente
   update(id: string, product: Partial<Product>): Observable<Product> {
     const url = `${this.apiUrl}/${id}`;
-    return this.http.put<{ products: Product }>(url, product).pipe(
-      map(response => response.products),
+    return this.http.put<{ product: Product }>(url, product).pipe(
+      map(response => response.product),
       catchError(this.handleError)
     );
   }
@@ -66,8 +66,8 @@ export class MyServiceService {
   // DELETE - Eliminar un producto
   delete(id: string): Observable<any> {
     const url = `${this.apiUrl}/${id}`;
-    return this.http.delete<{ products: any }>(url).pipe(
-      map(response => response.products),
+    return this.http.delete<{ product: any }>(url).pipe(
+      map(response => response.product),
       catchError(this.handleError)
     );
   }

@@ -53,6 +53,7 @@ export class ServicesComponent implements OnInit, OnDestroy {
     this.setupFormListeners();
   }
 
+  // Configurar listeners para statusChanges y valueChanges
   setupFormListeners(): void {
     // statusChanges - Monitorear el estado de validación del formulario
     this.productForm.statusChanges
@@ -213,6 +214,7 @@ export class ServicesComponent implements OnInit, OnDestroy {
 
   // GET BY ID y cargar en formulario para editar
   editProduct(id: string): void {
+    console.log("Cargando producto para edición, ID:", id);
     this.isLoading = true;
     this.productService.getById(id)
       .pipe(takeUntil(this.destroy$))
